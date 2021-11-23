@@ -1,0 +1,276 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ubuntu 树莓派开启 AP 热点 | Steven&#39;s blog</title>
+<link rel="shortcut icon" href="https://steven-ok.github.io/favicon.ico?v=1637659447973">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://steven-ok.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Ubuntu 树莓派开启 AP 热点 | Steven&#39;s blog - Atom Feed" href="https://steven-ok.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="
+出于某些原因，我需要在我的树莓派 4B 上打开一个 Ap 热点，用于共享 LAN 接口网络网络
+
+树莓派 4B 拥有一个 千兆 LAN 口，以及一个双频的 802.11ac 无线模块
+具体配置可参考 树莓派官网 &gt;&gt;&gt;
+..." />
+    <meta name="keywords" content="树莓派,Linux" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://steven-ok.github.io">
+  <img class="avatar" src="https://steven-ok.github.io/images/avatar.png?v=1637659447973" alt="">
+  </a>
+  <h1 class="site-title">
+    Steven&#39;s blog
+  </h1>
+  <p class="site-description">
+    Steven's blog
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="http://github.com/steven-ok" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Ubuntu 树莓派开启 AP 热点
+            </h2>
+            <div class="post-info">
+              <span>
+                2021-11-23
+              </span>
+              <span>
+                3 min read
+              </span>
+              
+                <a href="https://steven-ok.github.io/tag/CyhyU_H3x/" class="post-tag">
+                  # 树莓派
+                </a>
+              
+                <a href="https://steven-ok.github.io/tag/0miaRsQrIA/" class="post-tag">
+                  # Linux
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://steven-ok.github.io/post-images/ubuntu-shu-mei-pai-kai-qi-ap.svg" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <blockquote>
+<p>出于某些原因，我需要在我的树莓派 4B 上打开一个 Ap 热点，用于共享 LAN 接口网络网络</p>
+</blockquote>
+<p>树莓派 4B 拥有一个 千兆 LAN 口，以及一个双频的 802.11ac 无线模块</p>
+<p>具体配置可参考 <a href="https://www.raspberrypi.com/products/raspberry-pi-4-model-b/specifications/">树莓派官网 &gt;&gt;&gt;</a></p>
+<h4 id="具体操作方法">具体操作方法</h4>
+<ol>
+<li>
+<p>安装项目<br>
+本文使用项目脚本为 <a href="https://github.com/oblique/create_ap">create_ap</a>，该项目已经停更，不过目前仍然适用，不过在作者的 issue 中看到另外一个分叉项目 <a href="https://github.com/garywill/linux-router">linux_router</a> 仍然活跃，有兴趣可以去尝试使用一下😄</p>
+<pre><code class="language-php"> git clone https://github.com/oblique/create_ap
+ cd create_ap
+ sudo make install
+</code></pre>
+</li>
+<li>
+<p>安装依赖项</p>
+<pre><code class="language-php"># 该项目使用到下列依赖项目
+sudo apt update
+sudo apt install -y util-linux procps hostapd iproute2 iw haveged dnsmasq
+
+</code></pre>
+</li>
+<li>
+<p>配置 Ap</p>
+<pre><code class="language-php"># 查看你的网卡，如下图所示，找到你的 LAN 口 和 无线网卡
+ifconfig
+
+# 使用如下命令创建一个简单的 wifi, 其中 wlan0 是你的无线网卡，eth0 是你的 Lan 口，ctrl + c 停止
+sudo create_ap wlan0 eth0 热点名 密码
+
+# create_ap 使用 hostapd 创建 wifi，并使用 dnsmasq 提供 dns 功能, 配置文件位于 /etc/create_ap.conf 中
+# 其中关键的 配置 如 下 ↓↓↓
+IEEE80211N=1  # 启用80211n
+HT_CAPAB=[HT40+]  # 如果不设置默认速率为 75Mbps，设置后速率为 150Mbps
+FREQ_BAND=5 # 参数 5  2.4，分别代表 5G 和 2.4G 频段
+SSID=MyWifi # WIFI 名称
+PASSPHRASE=12345678 # WIFI 密码
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://steven-ok.github.io/post-images/1637657092082.png" alt="ifconfig截图" loading="lazy"></figure>
+</li>
+<li>
+<p>服务配置</p>
+<pre><code class="language-shell"># 打开 create_ap 服务
+sudo systemctl start create_ap.service
+# 设置服务开机自启
+sudo systemctl enable create_ap.service
+</code></pre>
+</li>
+</ol>
+<h4 id="过程中遇到的问题">过程中遇到的问题</h4>
+<ul>
+<li>
+<p>安装了 dnsmasq 后无法开启</p>
+<ul>
+<li>这是由于系统 systemd-resolved 服务占用 53 端口导致</li>
+</ul>
+<pre><code class="language-php"># 关闭系统 systemd-resolved.service
+sudo systemctl stop systemd-resolved.service
+
+### 关闭后若出现主机名无法解析，先忽略该错误，配置完成即可恢复正常
+
+# 修改配置文件，修改如下两处配置
+sudo vim /etc/systemd/resolved.conf
+
+DNS=114.114.114.114
+DNSStubListener=no
+
+# 重启 systemd-resolved.service
+sudo systemctl start systemd-resolved.service
+
+# 重新覆盖 /etc/resolv.conf 配置
+sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+</code></pre>
+</li>
+<li>
+<p>关于 WIFI 速率的问题</p>
+<ul>
+<li>从硬件上看，该网卡支持 <code>802.11ac</code> ，实际在配置方面，尝试过最大只能打开 <code>802.11n</code>，因此速率只有 <code>150Mbps</code>，并且 WIFI 信号一般，并不能作为专业路由器使用，临时用或者辅助使用尚可</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>本文使用操作系统为:  Ubuntu Server 20.04.3 LTS<br>
+其他系统版本，均可作为参考</p>
+</blockquote>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#%E5%85%B7%E4%BD%93%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95">具体操作方法</a></li>
+<li><a href="#%E8%BF%87%E7%A8%8B%E4%B8%AD%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98">过程中遇到的问题</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+
+        
+
+        <div class="site-footer">
+  🇨🇳  &nbsp;Powered by <a href="https://github.com" target="_blank">&nbsp;Github</a>
+  <a class="rss" href="https://steven-ok.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
